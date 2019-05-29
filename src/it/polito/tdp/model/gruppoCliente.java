@@ -15,12 +15,13 @@ public class gruppoCliente {
 	private int num;
 	private double tolleranza;
 	private statoClienti stato;
+	private Tavolo tavolo;
 	
 	public gruppoCliente() {
 		super();
 		Random random = new Random();
-		this.num = random.nextInt(10);
-		this.tolleranza = random.nextDouble();
+		this.num = random.nextInt(9)+1;
+		this.tolleranza = random.nextDouble()*0.9;
 		this.stato = statoClienti.ATTESA;
 	}
 
@@ -46,6 +47,14 @@ public class gruppoCliente {
 
 	public void setStato(statoClienti stato) {
 		this.stato = stato;
+	}
+
+	public Tavolo getTavolo() {
+		return tavolo;
+	}
+
+	public void setTavolo(Tavolo tavolo) {
+		this.tavolo = tavolo;
 	}
 	
 }

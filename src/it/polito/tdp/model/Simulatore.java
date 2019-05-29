@@ -1,21 +1,31 @@
 package it.polito.tdp.model;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Random;
+
+import javax.crypto.IllegalBlockSizeException;
+
+import it.polito.tdp.model.Evento.tipoEvento;
+import it.polito.tdp.model.gruppoCliente.statoClienti;
 
 public class Simulatore {
 
 	//MODELLO LO STATO SISTEMA
+	Random random = new Random();
 	
 	//PARAMETRI
 	private int numeroClienti = 2000;
 	Map<Integer, Tavolo> tavoli;
+	LocalDateTime ora = LocalDateTime.now();
 	
 	//OUTPUT
-	private int clientiTot;
 	private int clientiSI;
 	private int clientiNO;
 	
@@ -24,6 +34,76 @@ public class Simulatore {
 	
 	//init
 	public void init() {
+		
+		queue = new PriorityQueue<Evento>();
+		queue.add(new Evento(ora,new gruppoCliente(),tipoEvento.ARRIVO));
+		ora = ora.plusMinutes((long)(random.nextDouble()*10));
+		
+		for(int i = 1; i < this.numeroClienti; i++) {
+			queue.add(new Evento(ora,new gruppoCliente(),tipoEvento.ARRIVO));
+			System.out.println(ora);
+			ora = ora.plusMinutes((long)(random.nextDouble()*10));
+		}
+	}
+
+	//run
+	public void run() {
+		
+		clientiNO = 0;
+		clientiSI = 0;
+		
+		Evento evento;
+		while((evento=queue.poll()) != null) {
+			
+			System.out.println(evento.toString());
+			switch(evento.getTipo()) {
+			
+				case ARRIVO:
+					
+					boolean h = false;
+					double prob = Math.random();
+					for(int i = tavoli.size(); i > 0; i--) {
+						if(h==false) {
+						if(!tavoli.get(i).isOccupato()) {
+							if(tavoli.get(i).getPosti() >= evento.getClienti().getNum() && tavoli.get(i).getPosti() <= evento.getClienti().getNum()*2) {
+								System.out.println("Tavolo assegnato");
+								System.out.println(evento.getClienti().getNum()+" in un tavolo da "+tavoli.get(i).getPosti());
+								clientiSI += evento.getClienti().getNum();
+								tavoli.get(i).setOccupato(true);
+								evento.getClienti().setStato(statoClienti.SEDUTI);
+								evento.getClienti().setTavolo(tavoli.get(i));
+								queue.add(new Evento(evento.getOra().plusMinutes((long)(random.nextDouble()*60+60)),evento.getClienti(),tipoEvento.VIA));
+								h = true;
+								break;
+							}
+						}
+						} 
+						}
+				
+					if(h==false) {
+					if(evento.getClienti().getTolleranza() <= prob) {
+						System.out.println("stanno al bancone ");
+						System.out.println(evento.getClienti().getNum());
+						evento.getClienti().setStato(statoClienti.BANCONE);
+						this.clientiSI += evento.getClienti().getNum();
+					} else {
+						clientiNO += evento.getClienti().getNum();
+						System.out.println("se ne vanno i porci ");
+						System.out.println(evento.getClienti().getNum());
+
+					}
+					}
+				
+					
+				break;
+				
+				case VIA:
+					evento.getClienti().getTavolo().setOccupato(false);
+					System.out.println("Finito "+evento.getClienti().getTavolo().getPosti());
+					break;
+			}
+		}
+		
 	}
 	
 	public Simulatore() {
@@ -46,9 +126,12 @@ public class Simulatore {
 		tavoli.put(15, new Tavolo(15, 4, false));
 	}
 
-	//run
-	public void run() {
-		
+	public int getClientiSI() {
+		return clientiSI;
+	}
+
+	public int getClientiNO() {
+		return clientiNO;
 	}
 	
 }

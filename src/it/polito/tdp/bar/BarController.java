@@ -27,6 +27,8 @@ public class BarController {
     @FXML
     void doSimula(ActionEvent event) {
 
+    	txtResult.clear();
+    	txtResult.appendText(modello.simula());
     }
 
     @FXML

@@ -13,7 +13,7 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("Porto.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("Bar.fxml"));
 			BorderPane root = (BorderPane) loader.load();
 			BarController controller = loader.getController();
 			Model model = new Model();
